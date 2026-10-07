@@ -1,0 +1,60 @@
+{
+  "Zero1": {
+    "Smartphone": {
+      "revenue": 67234.41000000083,
+      "impressions": 13772739,
+      "responses": 18942330,
+      "requests": 1773708454,
+      "count": 145258,
+      "matchRate": 0.010679505956732616,
+      "sites": 515
+    },
+    "Desktop": {
+      "revenue": 66635.33999999998,
+      "impressions": 14216223,
+      "responses": 21213693,
+      "requests": 2585640053,
+      "count": 126543,
+      "matchRate": 0.008204426202087457,
+      "sites": 772
+    },
+    "All": {
+      "revenue": 133869.74999993006,
+      "impressions": 27988962,
+      "responses": 40156023,
+      "requests": 4359348507,
+      "count": 271801,
+      "matchRate": 0.00921147344276781,
+      "sites": 803
+    }
+  },
+  "Ellipsis": {
+    "Smartphone": {
+      "revenue": 34303.9599999863,
+      "impressions": 8429792,
+      "responses": 11224495,
+      "requests": 1809208685,
+      "count": 143957,
+      "matchRate": 0.006204090823276144,
+      "sites": 517
+    },
+    "Desktop": {
+      "revenue": 22727.90999999742,
+      "impressions": 5874883,
+      "responses": 8995298,
+      "requests": 2504298129,
+      "count": 121137,
+      "matchRate": 0.0035919437449693516,
+      "sites": 753
+    },
+    "All": {
+      "revenue": 57031.8700000037,
+      "impressions": 14304675,
+      "responses": 20219793,
+      "requests": 4313506814,
+      "count": 265094,
+      "matchRate": 0.004687553276692239,
+      "sites": 790
+    }
+  }
+}

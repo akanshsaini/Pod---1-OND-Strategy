@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AdOps Pivot Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-primary: #0a0e1a;
+  --bg-secondary: #111827;
+  --bg-card: rgba(17, 24, 39, 0.7);
+  --bg-glass: rgba(255,255,255,0.04);
+  --border-glass: rgba(255,255,255,0.08);
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent-blue: #3b82f6;
+  --accent-purple: #8b5cf6;
+  --accent-cyan: #06b6d4;
+  --green: #10b981;
+  --green-bg: rgba(16, 185, 129, 0.12);
+  --yellow: #f59e0b;
+  --yellow-bg: rgba(245, 158, 11, 0.12);
+  --red: #ef4444;
+  --red-bg: rgba(239, 68, 68, 0.12);
+  --critical: #dc2626;
+  --critical-bg: rgba(220, 38, 38, 0.15);
+  --gradient-1: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  --gradient-2: linear-gradient(135deg, #06b6d4, #3b82f6);
+  --gradient-3: linear-gradient(135deg, #8b5cf6, #ec4899);
+  --shadow-lg: 0 25px 50px -12px rgba(0,0,0,0.5);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Animated background */
+body::before {
+  content: '';
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 20% 50%, rgba(59,130,246,0.06) 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, rgba(139,92,246,0.05) 0%, transparent 50%),
+              radial-gradient(circle at 50% 80%, rgba(6,182,212,0.04) 0%, transparent 50%);
+  animation: bgFloat 20s ease-in-out infinite;
+  z-index: 0;
+  pointer-events: none;
+}
+
+@keyframes bgFloat {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(20px, -30px) rotate(1deg); }
+  66% { transform: translate(-15px, 15px) rotate(-1deg); }
+}
+
+.container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 24px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 28px;
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius);
+  margin-bottom: 24px;
+  animation: slideDown 0.6s ease;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.logo {
+  width: 42px;
+  height: 42px;
+  background: var(--gradient-1);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 800;
+  color: white;
+  box-shadow: 0 4px 15px rgba(59,130,246,0.3);
+}
+
+.header h1 {
+  font-size: 22px;
+  font-weight: 700;
+  background: var(--gradient-1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.5px;
+}
+
+.header-subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Upload Zone */
+.upload-zone {
+  position: relative;
+  border: 2px dashed rgba(59,130,246,0.3);
+  border-radius: var(--radius);
+  padding: 60px 40px;
+  text-align: center;
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  transition: var(--transition);
+  cursor: pointer;
+  margin-bottom: 24px;
+  animation: fadeIn 0.8s ease 0.2s both;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.upload-zone:hover, .upload-zone.dragover {
+  border-color: var(--accent-blue);
+  background: rgba(59,130,246,0.06);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(59,130,246,0.15);
+}
+
+.upload-zone input { display: none; }
+
+.upload-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  background: var(--gradient-1);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  box-shadow: 0 8px 25px rgba(59,130,246,0.25);
+}
+
+.upload-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.upload-desc {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.upload-desc span {
+  color: var(--accent-blue);
+  font-weight: 500;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Processing loader */
+.loader-wrap {
+  display: none;
+  text-align: center;
+  padding: 60px;
+}
+
+.loader-wrap.active { display: block; }
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(59,130,246,0.2);
+  border-top-color: var(--accent-blue);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Dashboard */
+#dashboard { display: none; }
+#dashboard.active { display: block; }
+
+/* Stats Row */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  transition: var(--transition);
+  animation: fadeIn 0.6s ease both;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255,255,255,0.12);
+  box-shadow: var(--shadow-lg);
+}
+
+.stat-card .label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 8px;
+}
+
+.stat-card .value {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -1px;
+}
+
+.stat-card .sub {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.stat-card.green .value { color: var(--green); }
+.stat-card.yellow .value { color: var(--yellow); }
+.stat-card.red .value { color: var(--red); }
+.stat-card.critical .value { color: var(--critical); }
+.stat-card.blue .value {
+  background: var(--gradient-2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.stat-card.purple .value {
+  background: var(--gradient-3);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Insights Section */
+.insights-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.insight-card {
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius);
+  padding: 20px;
+  animation: fadeIn 0.7s ease both;
+}
+
+.insight-card h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.insight-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.02);
+  border-radius: var(--radius-sm);
+  margin-bottom: 6px;
+  transition: var(--transition);
+  font-size: 13px;
+}
+
+.insight-item:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.insight-item .rank {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.insight-item .site-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+}
+
+.insight-item .metric {
+  font-weight: 700;
+  margin-left: 12px;
+  white-space: nowrap;
+}
+
+/* Toolbar */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  padding: 16px 20px;
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius);
+}
+
+.search-box {
+  flex: 1;
+  min-width: 260px;
+  position: relative;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 10px 14px 10px 40px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 14px;
+  transition: var(--transition);
+  outline: none;
+}
+
+.search-box input:focus {
+  border-color: var(--accent-blue);
+  background: rgba(59,130,246,0.06);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+}
+
+.search-box input::placeholder { color: var(--text-muted); }
+
+.search-box::before {
+  content: '🔍';
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filter-btn {
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255,255,255,0.1);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.filter-btn:hover {
+  background: rgba(255,255,255,0.06);
+  color: var(--text-primary);
+}
+
+.filter-btn.active {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+  color: white;
+}
+
+.filter-btn.active.green-f { background: var(--green); border-color: var(--green); }
+.filter-btn.active.yellow-f { background: var(--yellow); border-color: var(--yellow); color: #000; }
+.filter-btn.active.red-f { background: var(--red); border-color: var(--red); }
+.filter-btn.active.critical-f { background: var(--critical); border-color: var(--critical); }
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.count-badge {
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 6px 12px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 20px;
+}
+
+.btn {
+  padding: 9px 18px;
+  border-radius: var(--radius-sm);
+  border: none;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-primary {
+  background: var(--gradient-1);
+  color: white;
+  box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(59,130,246,0.4);
+}
+
+.btn-secondary {
+  background: rgba(255,255,255,0.06);
+  color: var(--text-primary);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+select.sort-select {
+  padding: 9px 14px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+  cursor: pointer;
+}
+
+select.sort-select option { background: var(--bg-secondary); }
+
+/* Table */
+.table-wrap {
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.table-scroll {
+  overflow-x: auto;
+  max-height: 75vh;
+  overflow-y: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+thead th {
+  background: rgba(17, 24, 39, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 12px 14px;
+  text-align: right;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-muted);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition: var(--transition);
+}
+
+thead th:hover {
+  color: var(--text-primary);
+  background: rgba(59,130,246,0.08);
+}
+
+thead th:first-child { text-align: left; position: sticky; left: 0; z-index: 11; min-width: 200px; }
+
+thead th .sort-arrow {
+  margin-left: 4px;
+  opacity: 0.3;
+  font-size: 10px;
+}
+
+thead th.sorted .sort-arrow { opacity: 1; color: var(--accent-blue); }
+
+tbody tr {
+  transition: var(--transition);
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+
+tbody tr:hover {
+  background: rgba(59,130,246,0.04);
+}
+
+tbody td {
+  padding: 10px 14px;
+  text-align: right;
+  white-space: nowrap;
+  color: var(--text-secondary);
+}
+
+tbody td:first-child {
+  text-align: left;
+  font-weight: 500;
+  color: var(--text-primary);
+  position: sticky;
+  left: 0;
+  background: var(--bg-primary);
+  z-index: 5;
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+tbody tr:hover td:first-child { background: rgba(10, 14, 26, 0.95); }
+
+.rev-cell { font-variant-numeric: tabular-nums; }
+
+.total-rev {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.change-cell {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.change-positive { color: var(--green); }
+.change-negative { color: var(--red); }
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status-green { background: var(--green-bg); color: var(--green); }
+.status-yellow { background: var(--yellow-bg); color: var(--yellow); }
+.status-red { background: var(--red-bg); color: var(--red); }
+.status-critical { background: var(--critical-bg); color: var(--critical); }
+
+/* Revenue heatmap coloring */
+.rev-high { color: var(--green); }
+.rev-mid { color: var(--text-secondary); }
+.rev-low { color: var(--text-muted); }
+
+/* Mini bar chart in cells */
+.mini-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.mini-bar {
+  width: 50px;
+  height: 4px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.mini-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+/* Match rate bar */
+.matchrate-bar .mini-bar-fill { background: var(--accent-cyan); }
+
+/* Metric Tabs */
+.metric-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 10px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border-glass);
+  width: fit-content;
+}
+
+.metric-tab {
+  padding: 9px 20px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.metric-tab:hover {
+  color: var(--text-primary);
+  background: rgba(255,255,255,0.05);
+}
+
+.metric-tab.active {
+  background: var(--accent-blue);
+  color: white;
+  box-shadow: 0 2px 8px rgba(59,130,246,0.3);
+}
+
+.metric-tab.active[data-metric="ecpm"] {
+  background: var(--accent-purple);
+  box-shadow: 0 2px 8px rgba(139,92,246,0.3);
+}
+
+.metric-tab.active[data-metric="matchRate"] {
+  background: var(--accent-cyan);
+  box-shadow: 0 2px 8px rgba(6,182,212,0.3);
+}
+
+.metric-tab.active[data-metric="adRequests"] {
+  background: #f59e0b;
+  color: #000;
+  box-shadow: 0 2px 8px rgba(245,158,11,0.3);
+}
+
+.metric-indicator {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.15);
+  font-weight: 600;
+}
+
+/* Footer */
+.table-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Tooltip */
+.tooltip {
+  position: relative;
+}
+
+.tooltip:hover::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-glass);
+  z-index: 100;
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .insights-grid { grid-template-columns: 1fr; }
+  .stats-row { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .container { padding: 12px; }
+  .header { flex-direction: column; gap: 12px; text-align: center; }
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .toolbar { flex-direction: column; align-items: stretch; }
+  .toolbar-right { margin-left: 0; justify-content: space-between; }
+  .search-box { min-width: unset; }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+/* New file badge */
+.file-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: rgba(59,130,246,0.1);
+  border: 1px solid rgba(59,130,246,0.2);
+  border-radius: 20px;
+  font-size: 12px;
+  color: var(--accent-blue);
+  font-weight: 500;
+}
+
+/* animate rows */
+tbody tr { animation: rowFadeIn 0.3s ease both; }
+@keyframes rowFadeIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Revenue sparkline-style day cells */
+.day-cell { font-variant-numeric: tabular-nums; }
+
+/* Top bar mini chart */
+.revenue-trend {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 32px;
+  margin-top: 8px;
+}
+
+.revenue-trend .bar {
+  flex: 1;
+  background: var(--gradient-2);
+  border-radius: 2px 2px 0 0;
+  min-width: 4px;
+  transition: height 0.4s ease;
+  opacity: 0.7;
+}
+
+.revenue-trend .bar:hover { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <div class="logo">P</div>
+      <div>
+        <h1>AdOps Pivot Dashboard</h1>
+        <div class="header-subtitle">Network Revenue Analysis · Google Ad Manager</div>
+      </div>
+    </div>
+    <div class="header-right" id="headerRight">
+      <button class="btn btn-secondary" id="newFileBtn" style="display:none" onclick="resetDashboard()">📂 Load New File</button>
+    </div>
+  </div>
+
+  <!-- Upload Zone -->
+  <div class="upload-zone" id="uploadZone">
+    <input type="file" id="fileInput" accept=".csv">
+    <div class="upload-icon">📊</div>
+    <div class="upload-title">Drop your GAM CSV export here</div>
+    <div class="upload-desc">or <span onclick="document.getElementById('fileInput').click()">browse files</span> · Supports raw Network / MCM exports</div>
+  </div>
+
+  <!-- Loader -->
+  <div class="loader-wrap" id="loader">
+    <div class="spinner"></div>
+    <div style="font-size:16px;font-weight:600;margin-bottom:6px">Processing your data...</div>
+    <div style="font-size:13px;color:var(--text-muted)">Detecting columns, building pivot table</div>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="dashboard">
+    <!-- Stats Row -->
+    <div class="stats-row" id="statsRow"></div>
+
+    <!-- Insights Grid -->
+    <div class="insights-grid" id="insightsGrid"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Search sites..." oninput="applyFilters()">
+      </div>
+      <div class="filter-group">
+        <button class="filter-btn active" data-filter="all" onclick="toggleFilter(this)">All</button>
+        <button class="filter-btn green-f" data-filter="green" onclick="toggleFilter(this)">🟢 Spike</button>
+        <button class="filter-btn yellow-f" data-filter="yellow" onclick="toggleFilter(this)">🟡 Drop</button>
+        <button class="filter-btn red-f" data-filter="red" onclick="toggleFilter(this)">🔴 Red</button>
+        <button class="filter-btn critical-f" data-filter="critical" onclick="toggleFilter(this)">🚨 Critical</button>
+        <button class="filter-btn" data-filter="normal" onclick="toggleFilter(this)">⚪ Normal</button>
+      </div>
+      <div class="toolbar-right">
+        <select class="sort-select" id="sortSelect" onchange="applySort()">
+          <option value="total_desc">Revenue ↓</option>
+          <option value="total_asc">Revenue ↑</option>
+          <option value="change_desc">Change % ↓</option>
+          <option value="change_asc">Change % ↑</option>
+          <option value="d7_desc">D7 Revenue ↓</option>
+          <option value="match_desc">Match Rate ↓</option>
+          <option value="ecpm_desc">eCPM ↓</option>
+          <option value="requests_desc">Ad Requests ↓</option>
+        </select>
+        <span class="count-badge" id="countBadge">0 sites</span>
+        <button class="btn btn-primary" onclick="exportCSV()">⬇ Export CSV</button>
+      </div>
+    </div>
+
+    <!-- Metric Tabs -->
+    <div class="metric-tabs" id="metricTabs">
+      <button class="metric-tab active" data-metric="revenue" onclick="switchMetric(this)">💰 Revenue</button>
+      <button class="metric-tab" data-metric="ecpm" onclick="switchMetric(this)">📊 eCPM</button>
+      <button class="metric-tab" data-metric="matchRate" onclick="switchMetric(this)">🎯 Match Rate</button>
+      <button class="metric-tab" data-metric="adRequests" onclick="switchMetric(this)">📡 Ad Requests</button>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table id="pivotTable">
+          <thead id="tableHead"></thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+      <div class="table-footer">
+        <span id="footerInfo">Ready</span>
+        <span id="footerDates"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Global state
+let allData = [];
+let filteredData = [];
+let dateLabels = [];
+let currentFilter = 'all';
+let currentSort = 'total_desc';
+let maxRevenue = 0;
+let currentMetric = 'revenue';
+
+// ── File Upload ──
+const uploadZone = document.getElementById('uploadZone');
+const fileInput = document.getElementById('fileInput');
+
+uploadZone.addEventListener('click', () => fileInput.click());
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadZone.classList.remove('dragover');
+  if (e.dataTransfer.files.length) processFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', e => { if (e.target.files.length) processFile(e.target.files[0]); });
+
+function resetDashboard() {
+  document.getElementById('dashboard').classList.remove('active');
+  uploadZone.style.display = '';
+  document.getElementById('newFileBtn').style.display = 'none';
+  fileInput.value = '';
+}
+
+function processFile(file) {
+  if (!file.name.endsWith('.csv')) { alert('Please upload a CSV file.'); return; }
+  uploadZone.style.display = 'none';
+  document.getElementById('loader').classList.add('active');
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    setTimeout(() => {
+      try {
+        parseAndProcess(e.target.result, file.name);
+      } catch(err) {
+        alert('Error processing file: ' + err.message);
+        uploadZone.style.display = '';
+      }
+      document.getElementById('loader').classList.remove('active');
+    }, 400);
+  };
+  reader.readAsText(file);
+}
+
+// ── CSV Parser ──
+function parseCSV(text) {
+  const rows = [];
+  let current = '';
+  let inQuotes = false;
+  const lines = text.split('\n');
+  
+  for (const line of lines) {
+    const trimmed = line.replace(/\r$/, '');
+    if (!trimmed && !inQuotes) continue;
+    
+    const cells = [];
+    let cell = '';
+    for (let i = 0; i < trimmed.length; i++) {
+      const ch = trimmed[i];
+      if (ch === '"') { inQuotes = !inQuotes; }
+      else if (ch === ',' && !inQuotes) { cells.push(cell.trim()); cell = ''; }
+      else { cell += ch; }
+    }
+    cells.push(cell.trim());
+    rows.push(cells);
+  }
+  return rows;
+}
+
+function pf(val) {
+  const n = parseFloat(String(val).replace(/,/g, ''));
+  return isNaN(n) ? 0 : n;
+}
+
+// ── Main Processing ──
+function parseAndProcess(text, fileName) {
+  const rows = parseCSV(text);
+  if (!rows.length) throw new Error('Empty file');
+
+  // Detect header row
+  let headerIdx = -1;
+  let colMap = {};
+  for (let i = 0; i < Math.min(rows.length, 10); i++) {
+    const lower = rows[i].map(c => c.toLowerCase());
+    const hasDate = lower.some(c => c.includes('date'));
+    const hasSite = lower.some(c => c.includes('site'));
+    const hasRev = lower.some(c => c.includes('revenue'));
+    if (hasDate && hasSite && hasRev) {
+      headerIdx = i;
+      lower.forEach((c, j) => colMap[c] = j);
+      break;
+    }
+  }
+  if (headerIdx < 0) throw new Error('Could not detect header row.');
+
+  const header = rows[headerIdx].map(c => c.toLowerCase().trim());
+  
+  // Dynamic column detection
+  let dateCol = -1, siteCol = -1, revCol = -1, mrCol = -1, ecpmCol = -1, arCol = -1;
+  header.forEach((c, j) => {
+    if (c.includes('date') && dateCol < 0) dateCol = j;
+    else if ((c === 'site' || c === 'site (dcm)') && siteCol < 0) siteCol = j;
+    else if (c.includes('revenue') && revCol < 0) revCol = j;
+    else if (c.includes('match rate') && mrCol < 0) mrCol = j;
+    else if ((c.includes('average ecpm') || (c.includes('ecpm') && !c.includes('total'))) && ecpmCol < 0) ecpmCol = j;
+    else if (c.includes('total ad requests') && arCol < 0) arCol = j;
+    else if (c.includes('ad exchange total requests') && arCol < 0) arCol = j;
+  });
+
+  if (dateCol < 0 || siteCol < 0 || revCol < 0) throw new Error('Missing required columns.');
+
+  // Parse data
+  const siteDate = {};
+  const allDates = new Set();
+  const skipSites = new Set(['', 'total', 'grand total', 'web caches and other', '(blank)']);
+
+  for (let i = headerIdx + 1; i < rows.length; i++) {
+    const row = rows[i];
+    if (!row || row.length <= Math.max(dateCol, siteCol, revCol)) continue;
+    
+    const date = row[dateCol]?.trim();
+    const site = row[siteCol]?.trim();
+    if (!date || !site || skipSites.has(site.toLowerCase())) continue;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
+
+    allDates.add(date);
+    if (!siteDate[site]) siteDate[site] = {};
+    if (!siteDate[site][date]) siteDate[site][date] = { revenue: 0, match_rate: 0, ecpm: 0, ad_requests: 0 };
+
+    const entry = siteDate[site][date];
+    entry.revenue += pf(row[revCol]);
+    if (mrCol >= 0 && mrCol < row.length) entry.match_rate = pf(row[mrCol]);
+    if (ecpmCol >= 0 && ecpmCol < row.length) entry.ecpm = pf(row[ecpmCol]);
+    if (arCol >= 0 && arCol < row.length) entry.ad_requests += pf(row[arCol]);
+  }
+
+  const sortedDates = [...allDates].sort();
+  const pivotDates = sortedDates.slice(-7);
+  
+  dateLabels = pivotDates.map(d => {
+    const dt = new Date(d + 'T00:00:00');
+    return dt.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+  });
+
+  // Build pivot
+  allData = [];
+  for (const [site, dateData] of Object.entries(siteDate)) {
+    const revenues = pivotDates.map(d => dateData[d]?.revenue || 0);
+    const ecpms = pivotDates.map(d => dateData[d]?.ecpm || 0);
+    const matchRates = pivotDates.map(d => dateData[d]?.match_rate || 0);
+    const adRequestsArr = pivotDates.map(d => Math.round(dateData[d]?.ad_requests || 0));
+    const totalRev = revenues.reduce((a, b) => a + b, 0);
+    const latest = dateData[pivotDates[pivotDates.length - 1]] || {};
+    
+    const d7 = revenues[revenues.length - 1] || 0;
+    const d1d6 = revenues.slice(0, -1);
+    const avgD1D6 = d1d6.length ? d1d6.reduce((a, b) => a + b, 0) / d1d6.length : 0;
+    const changePct = avgD1D6 > 0 ? ((d7 - avgD1D6) / avgD1D6) * 100 : 0;
+
+    let status = '';
+    if (changePct < -70) status = 'critical';
+    else if (changePct < -50) status = 'red';
+    else if (changePct <= -20) status = 'yellow';
+    else if (changePct > 10) status = 'green';
+    else status = 'normal';
+
+    // Totals / averages for each metric across the period
+    const totalAdRequests = adRequestsArr.reduce((a, b) => a + b, 0);
+    const avgEcpm = ecpms.filter(v => v > 0).length ? ecpms.reduce((a, b) => a + b, 0) / ecpms.filter(v => v > 0).length : 0;
+    const avgMatchRate = matchRates.filter(v => v > 0).length ? matchRates.reduce((a, b) => a + b, 0) / matchRates.filter(v => v > 0).length : 0;
+
+    allData.push({
+      site,
+      revenues,
+      ecpms,
+      matchRates,
+      adRequestsArr,
+      totalRevenue: totalRev,
+      totalAdRequests,
+      avgEcpm,
+      avgMatchRate,
+      matchRate: (latest.match_rate || 0),
+      ecpm: latest.ecpm || 0,
+      adRequests: Math.round(latest.ad_requests || 0),
+      changePct,
+      status
+    });
+  }
+
+  maxRevenue = Math.max(...allData.map(d => d.totalRevenue), 1);
+
+  // Show dashboard
+  document.getElementById('dashboard').classList.add('active');
+  document.getElementById('newFileBtn').style.display = '';
+  
+  renderStats();
+  renderInsights();
+  renderTableHeader();
+  applySort();
+}
+
+// ── Render Stats ──
+function renderStats() {
+  const total = allData.reduce((a, d) => a + d.totalRevenue, 0);
+  const avgRev = total / (allData.length || 1);
+  const greens = allData.filter(d => d.status === 'green').length;
+  const yellows = allData.filter(d => d.status === 'yellow').length;
+  const reds = allData.filter(d => d.status === 'red').length;
+  const crits = allData.filter(d => d.status === 'critical').length;
+
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-card blue" style="animation-delay:0.1s">
+      <div class="label">Total Revenue (7 Days)</div>
+      <div class="value">$${total.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
+      <div class="sub">${allData.length} sites tracked</div>
+    </div>
+    <div class="stat-card purple" style="animation-delay:0.15s">
+      <div class="label">Avg Revenue / Site</div>
+      <div class="value">$${avgRev.toFixed(2)}</div>
+      <div class="sub">across ${dateLabels.length} days</div>
+    </div>
+    <div class="stat-card green" style="animation-delay:0.2s">
+      <div class="label">Spikes (> +10%)</div>
+      <div class="value">${greens}</div>
+      <div class="sub">🟢 Revenue increasing</div>
+    </div>
+    <div class="stat-card yellow" style="animation-delay:0.25s">
+      <div class="label">Drops (-20% to -30%)</div>
+      <div class="value">${yellows}</div>
+      <div class="sub">🟡 Watch closely</div>
+    </div>
+    <div class="stat-card red" style="animation-delay:0.3s">
+      <div class="label">Red (> -50%)</div>
+      <div class="value">${reds}</div>
+      <div class="sub">🔴 Significant drop</div>
+    </div>
+    <div class="stat-card critical" style="animation-delay:0.35s">
+      <div class="label">Critical (> -70%)</div>
+      <div class="value">${crits}</div>
+      <div class="sub">🚨 Needs attention</div>
+    </div>
+  `;
+}
+
+// ── Render Insights ──
+function renderInsights() {
+  const top5 = [...allData].sort((a, b) => b.totalRevenue - a.totalRevenue).slice(0, 5);
+  const drops = [...allData].filter(d => d.changePct < -10 && d.totalRevenue > 1)
+    .sort((a, b) => a.changePct - b.changePct).slice(0, 5);
+  const spikes = [...allData].filter(d => d.changePct > 10 && d.totalRevenue > 1)
+    .sort((a, b) => b.changePct - a.changePct).slice(0, 5);
+
+  function renderList(items, metricFn, colorFn) {
+    return items.map((d, i) => `
+      <div class="insight-item">
+        <span class="rank" style="background:${colorFn(i)};color:white">${i + 1}</span>
+        <span class="site-name" title="${d.site}">${d.site}</span>
+        <span class="metric" style="color:${colorFn(i)}">${metricFn(d)}</span>
+      </div>
+    `).join('');
+  }
+
+  const blue = ['#3b82f6','#6366f1','#8b5cf6','#a78bfa','#c4b5fd'];
+  const red = ['#dc2626','#ef4444','#f87171','#fca5a5','#fecaca'];
+  const green = ['#059669','#10b981','#34d399','#6ee7b7','#a7f3d0'];
+
+  document.getElementById('insightsGrid').innerHTML = `
+    <div class="insight-card" style="animation-delay:0.2s">
+      <h3>🔥 Top 5 by Revenue</h3>
+      ${renderList(top5, d => '$' + d.totalRevenue.toLocaleString('en-US', {maximumFractionDigits:2}), i => blue[i])}
+    </div>
+    <div class="insight-card" style="animation-delay:0.3s">
+      <h3>📉 Biggest Drops</h3>
+      ${renderList(drops, d => d.changePct.toFixed(1) + '%', i => red[i])}
+    </div>
+    <div class="insight-card" style="animation-delay:0.4s">
+      <h3>📈 Biggest Spikes</h3>
+      ${renderList(spikes, d => '+' + d.changePct.toFixed(1) + '%', i => green[i])}
+    </div>
+  `;
+}
+
+// ── Metric Tabs ──
+function switchMetric(btn) {
+  document.querySelectorAll('.metric-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentMetric = btn.dataset.metric;
+  renderTableHeader();
+  renderTable();
+}
+
+// Metric config
+const metricConfig = {
+  revenue:     { label: 'Revenue',     unit: '$', prefix: '$', decimals: 2, totalKey: 'totalRevenue',    totalLabel: 'Total Rev',       colorFn: v => v > 100 ? 'var(--green)' : v > 10 ? 'var(--text-secondary)' : v > 1 ? 'var(--text-muted)' : 'rgba(100,116,139,0.5)', formatFn: v => v.toFixed(2) },
+  ecpm:        { label: 'eCPM',        unit: '$', prefix: '$', decimals: 2, totalKey: 'avgEcpm',         totalLabel: 'Avg eCPM',        colorFn: v => v > 5 ? 'var(--accent-purple)' : v > 2 ? 'var(--text-secondary)' : v > 0.5 ? 'var(--text-muted)' : 'rgba(100,116,139,0.5)', formatFn: v => v.toFixed(2) },
+  matchRate:   { label: 'Match Rate',  unit: '%', prefix: '',  decimals: 2, totalKey: 'avgMatchRate',     totalLabel: 'Avg Match Rate',  colorFn: v => v > 5 ? 'var(--accent-cyan)' : v > 1 ? 'var(--text-secondary)' : v > 0.1 ? 'var(--text-muted)' : 'rgba(100,116,139,0.5)', formatFn: v => (v * 100).toFixed(2) + '%' },
+  adRequests:  { label: 'Ad Requests', unit: '',  prefix: '',  decimals: 0, totalKey: 'totalAdRequests',  totalLabel: 'Total Requests',  colorFn: v => v > 10000 ? 'var(--yellow)' : v > 1000 ? 'var(--text-secondary)' : v > 100 ? 'var(--text-muted)' : 'rgba(100,116,139,0.5)', formatFn: v => Math.round(v).toLocaleString() }
+};
+
+// Map metric key to the day-on-day array field name
+const metricArrayKey = {
+  revenue: 'revenues',
+  ecpm: 'ecpms',
+  matchRate: 'matchRates',
+  adRequests: 'adRequestsArr'
+};
+
+// ── Table ──
+function renderTableHeader() {
+  const mc = metricConfig[currentMetric];
+  const dayHeaders = dateLabels.map((d, i) => `<th onclick="sortBy('d${i}')" data-col="d${i}">D${i+1}<br><small style="font-weight:400;opacity:0.6">${d}</small> <span class="sort-arrow">▲</span></th>`).join('');
+  
+  document.getElementById('tableHead').innerHTML = `<tr>
+    <th onclick="sortBy('site')" data-col="site">Site <span class="sort-arrow">▲</span></th>
+    ${dayHeaders}
+    <th onclick="sortBy('total')" data-col="total" class="sorted">${mc.totalLabel} <span class="sort-arrow">▼</span></th>
+    <th onclick="sortBy('change')" data-col="change">Rev Change % <span class="sort-arrow">▲</span></th>
+    <th>Status</th>
+  </tr>`;
+  
+  document.getElementById('footerDates').textContent = `${dateLabels[0]} → ${dateLabels[dateLabels.length-1]} · Viewing: ${mc.label}`;
+}
+
+function renderTable() {
+  const tbody = document.getElementById('tableBody');
+  const mc = metricConfig[currentMetric];
+  const arrKey = metricArrayKey[currentMetric];
+  
+  let html = '';
+  filteredData.forEach((d, idx) => {
+    const dayValues = d[arrKey] || [];
+    
+    const daysCells = dayValues.map(v => {
+      const displayVal = currentMetric === 'matchRate' ? v * 100 : v;
+      const color = mc.colorFn(displayVal);
+      return `<td class="day-cell rev-cell" style="color:${color}">${mc.formatFn(v)}</td>`;
+    }).join('');
+
+    // Total/avg column
+    const totalVal = d[mc.totalKey] || 0;
+    let totalDisplay = '';
+    if (currentMetric === 'revenue') {
+      totalDisplay = '$' + totalVal.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+    } else if (currentMetric === 'ecpm') {
+      totalDisplay = '$' + totalVal.toFixed(2);
+    } else if (currentMetric === 'matchRate') {
+      totalDisplay = (totalVal * 100).toFixed(2) + '%';
+    } else {
+      totalDisplay = totalVal.toLocaleString();
+    }
+
+    const changeCls = d.changePct >= 0 ? 'change-positive' : 'change-negative';
+    const changePrefix = d.changePct >= 0 ? '+' : '';
+    
+    let statusHtml = '';
+    if (d.status === 'green') statusHtml = '<span class="status-badge status-green">🟢 Spike</span>';
+    else if (d.status === 'yellow') statusHtml = '<span class="status-badge status-yellow">🟡 Drop</span>';
+    else if (d.status === 'red') statusHtml = '<span class="status-badge status-red">🔴 Red</span>';
+    else if (d.status === 'critical') statusHtml = '<span class="status-badge status-critical">🚨 Critical</span>';
+
+    html += `<tr style="animation-delay:${Math.min(idx * 0.02, 0.5)}s">
+      <td title="${d.site}">${d.site}</td>
+      ${daysCells}
+      <td class="total-rev">${totalDisplay}</td>
+      <td class="change-cell ${changeCls}">${changePrefix}${d.changePct.toFixed(2)}%</td>
+      <td>${statusHtml}</td>
+    </tr>`;
+  });
+
+  tbody.innerHTML = html;
+  document.getElementById('countBadge').textContent = `${filteredData.length} sites`;
+  document.getElementById('footerInfo').textContent = `Showing ${filteredData.length} of ${allData.length} sites · Metric: ${mc.label}`;
+}
+
+// ── Filters ──
+function toggleFilter(btn) {
+  const filter = btn.dataset.filter;
+  
+  if (filter === 'all') {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = 'all';
+  } else {
+    document.querySelector('.filter-btn[data-filter="all"]').classList.remove('active');
+    if (btn.classList.contains('active')) {
+      btn.classList.remove('active');
+      const actives = document.querySelectorAll('.filter-btn.active');
+      if (!actives.length) {
+        document.querySelector('.filter-btn[data-filter="all"]').classList.add('active');
+        currentFilter = 'all';
+      }
+    } else {
+      btn.classList.add('active');
+    }
+  }
+  applyFilters();
+}
+
+function applyFilters() {
+  const search = document.getElementById('searchInput').value.toLowerCase().trim();
+  const activeFilters = [...document.querySelectorAll('.filter-btn.active')].map(b => b.dataset.filter);
+  const isAll = activeFilters.includes('all');
+
+  filteredData = allData.filter(d => {
+    if (search && !d.site.toLowerCase().includes(search)) return false;
+    if (isAll) return true;
+    return activeFilters.includes(d.status);
+  });
+
+  applyCurrentSort();
+  renderTable();
+}
+
+// ── Sort ──
+function applySort() {
+  currentSort = document.getElementById('sortSelect').value;
+  applyFilters();
+}
+
+function sortBy(col) {
+  const map = {
+    'site': 'site_asc',
+    'total': 'total_desc',
+    'change': 'change_desc',
+    'match': 'match_desc',
+    'ecpm': 'ecpm_desc',
+    'requests': 'requests_desc'
+  };
+  
+  // Handle day columns - sort by currently selected metric
+  if (col.startsWith('d')) {
+    const idx = parseInt(col.substring(1));
+    const arrKey = metricArrayKey[currentMetric];
+    filteredData.sort((a, b) => (b[arrKey]?.[idx] || 0) - (a[arrKey]?.[idx] || 0));
+    renderTable();
+    return;
+  }
+
+  if (map[col]) {
+    // Toggle direction if same column
+    if (currentSort === map[col]) {
+      currentSort = map[col].replace('_desc', '_asc').replace('_asc', '_desc');
+      if (currentSort === map[col]) currentSort = map[col].includes('desc') ? map[col].replace('desc','asc') : map[col].replace('asc','desc');
+    } else {
+      currentSort = map[col];
+    }
+    document.getElementById('sortSelect').value = currentSort;
+    applyCurrentSort();
+    renderTable();
+  }
+}
+
+function applyCurrentSort() {
+  const [field, dir] = currentSort.split('_');
+  const mul = dir === 'desc' ? -1 : 1;
+
+  filteredData.sort((a, b) => {
+    switch(field) {
+      case 'total': return mul * (a.totalRevenue - b.totalRevenue);
+      case 'change': return mul * (a.changePct - b.changePct);
+      case 'match': return mul * (a.matchRate - b.matchRate);
+      case 'ecpm': return mul * (a.ecpm - b.ecpm);
+      case 'requests': return mul * (a.adRequests - b.adRequests);
+      case 'd7': return mul * ((a.revenues[a.revenues.length-1]||0) - (b.revenues[b.revenues.length-1]||0));
+      case 'site': return mul * a.site.localeCompare(b.site);
+      default: return mul * (a.totalRevenue - b.totalRevenue);
+    }
+  });
+}
+
+// ── Export ──
+function exportCSV() {
+  const dayHeaders = dateLabels.map((d, i) => `D${i+1} (${d})`);
+  
+  // Build headers with all 4 metrics day-on-day
+  const revDayH = dayHeaders.map(h => `Rev ${h}`);
+  const ecpmDayH = dayHeaders.map(h => `eCPM ${h}`);
+  const mrDayH = dayHeaders.map(h => `MR ${h}`);
+  const arDayH = dayHeaders.map(h => `AR ${h}`);
+  
+  const headers = ['Site', ...revDayH, 'Total Revenue', ...ecpmDayH, 'Avg eCPM', ...mrDayH, 'Avg Match Rate', ...arDayH, 'Total Ad Requests', 'Revenue Change %', 'Status'];
+  
+  const statusLabels = { green: '🟢 GREEN', yellow: '🟡 YELLOW', red: '🔴 RED', critical: '🚨 CRITICAL', normal: '' };
+  
+  let csv = headers.join(',') + '\n';
+  filteredData.forEach(d => {
+    const row = [
+      `"${d.site}"`,
+      ...d.revenues.map(r => r.toFixed(2)),
+      d.totalRevenue.toFixed(2),
+      ...d.ecpms.map(r => r.toFixed(2)),
+      d.avgEcpm.toFixed(2),
+      ...d.matchRates.map(r => (r * 100).toFixed(2) + '%'),
+      (d.avgMatchRate * 100).toFixed(2) + '%',
+      ...d.adRequestsArr.map(r => r),
+      d.totalAdRequests,
+      d.changePct.toFixed(2) + '%',
+      statusLabels[d.status] || ''
+    ];
+    csv += row.join(',') + '\n';
+  });
+
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'pivot_dashboard_export.csv';
+  link.click();
+}
+
+// Keyboard shortcut
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+    e.preventDefault();
+    document.getElementById('searchInput')?.focus();
+  }
+});
+</script>
+</body>
+</html>
